@@ -9,7 +9,7 @@
 -- Table 'SessionInfo'
 -- 
 -- ---
-
+ 
 DROP TABLE IF EXISTS SessionInfo cascade;
 DROP SEQUENCE IF EXISTS SessionInfo_seq;
 CREATE SEQUENCE SessionInfo_seq;
