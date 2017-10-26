@@ -22,6 +22,7 @@ CREATE TABLE SessionInfo (
   majorPair VARCHAR(6),
   indicator VARCHAR(50),
   interval VARCHAR(50),
+  requestTime timestamp,
   PRIMARY KEY (id)
 );
 
