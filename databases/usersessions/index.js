@@ -1,10 +1,10 @@
-var pg = require('pg');
-var Promise = require('bluebird');
+const pg = require('pg');
+const Promise = require('bluebird');
 
-var Chance = require('chance');
-var chance = new Chance();
+const Chance = require('chance');
+const chance = new Chance();
 
-var config = {};
+const config = {};
 
 if (process.env.DATABASE_URL) {
   config.connectionString = process.env.DATABASE_URL;
@@ -12,9 +12,9 @@ if (process.env.DATABASE_URL) {
   config.user = 'macd';
   config.password = 'macd';
   config.database = 'usersessions';
-} 
+}
 
-var pool = new pg.Pool(config)
+const pool = new pg.Pool(config)
 pool.connect();
 
 const numberOfSessionBundles = 5000;
@@ -28,13 +28,13 @@ createSessionBundle
 =========================================================== */
 
 const createSessionBundle = (numberOfSessionBundles) => {
-  var startTime = new Date();
+  let startTime = new Date();
 
-  for (var i = 0; i < numberOfSessionBundles; i++) {
-    var user_id = newUser();
-    var session_id = newSession();
+  for (let i = 0; i < numberOfSessionBundles; i++) {
+    let user_id = newUser();
+    let session_id = newSession();
 
-    var numberOfResearch = requestTypeFrequency();
+    let numberOfResearch = requestTypeFrequency();
     sessionResearchActivity(numberOfResearch, user_id, session_id);
   }
 
@@ -53,17 +53,17 @@ sessionResearchActivity
 =========================================================== */
 
 const sessionResearchActivity = (numberOfResearch, user_id, session_id) => {
-  for (var i = 0; i < numberOfResearch; i++) {
-    var majorPair = generateMajorPair();
-    var indicator = generateResearchType();
-    var interval = generateInterval();
+  for (let i = 0; i < numberOfResearch; i++) {
+    let majorPair = generateMajorPair();
+    let indicator = generateResearchType();
+    let interval = generateInterval();
     addResearchSessionData(user_id, session_id, 'research', majorPair, indicator, interval);
   }
   addResearchSessionData(user_id, session_id, 'END', 'END', 'END', 'END');
 }
 
 /* ===========================================================
-generate random num (0-100) for frequency of each requestType in this session
+generate random num (0-100) for number of requests in user's visit
 =========================================================== */
 const requestTypeFrequency = () => {
   return Math.floor((Math.random() * 100) + 1);
@@ -87,8 +87,7 @@ const newSession = () => {
 generate Major Pair, no weighting
 =========================================================== */
 const generateMajorPair = () => {
-  var majorPairTypes = ['EURUSD', 'GBPUSD', 'USDCAD', 'USDCHF' ,'USDJPY', 'EURGBP', 'EURCHF', 'AUDUSD', 'EURJPY', 'GBPJPY'];
-  return majorPairTypes[Math.floor(Math.random() * majorPairTypes.length)];
+  const majorPairTypes = ['EURUSD', 'GBPUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'EURGBP', 'EURCHF', 'AUDUSD', 'EURJPY', 'GBPJPY'];
   return chance.pickone(majorPairTypes);
 }
 
@@ -96,7 +95,7 @@ const generateMajorPair = () => {
 generate research type, weighted for MACD
 =========================================================== */
 const generateResearchType = () => {
-  var researchTypes = ['MACD', 'EMA', 'MA'];
+  const researchTypes = ['MACD', 'EMA', 'MA'];
   return chance.weighted(researchTypes, [15, 7, 5]);
 }
 
@@ -104,7 +103,7 @@ const generateResearchType = () => {
 generate research interval, heavily weighted for 5s
 =========================================================== */
 const generateInterval = () => {
-  var intervalTypes = ['5s', '1', '30', '1h', '1d', '1m'];
+  const intervalTypes = ['5s', '1', '30', '1h', '1d', '1m'];
   return chance.weighted(intervalTypes, [100, 20, 10, 20, 20, 5]);
 }
 
@@ -114,8 +113,8 @@ Output: Promise object resolving to added row info.
 =========================================================== */
 const addResearchSessionData = (user_id, session_id, requestType, majorPair, indicator, interval) => {
 
-  var query = "INSERT INTO sessioninfo (user_id, session_id, requestType, majorPair, indicator, interval) VALUES ($1, $2, $3, $4, $5, $6)";
-  var values = [user_id, session_id, requestType, majorPair, indicator, interval];
+  const query = "INSERT INTO sessioninfo (user_id, session_id, requestType, majorPair, indicator, interval) VALUES ($1, $2, $3, $4, $5, $6)";
+  let values = [user_id, session_id, requestType, majorPair, indicator, interval];
 
   return new Promise(function (resolve, reject) {
     pool.query(query, values, function (err, result) {
