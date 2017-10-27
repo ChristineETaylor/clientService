@@ -17,33 +17,42 @@ if (process.env.DATABASE_URL) {
 var pool = new pg.Pool(config)
 pool.connect();
 
-const numberOfSessionBundles = 10000;
+const numberOfSessionBundles = 10;
 
 /* ===========================================================
 createSessionBundle
 -generate user_id
 -generate session_id
--generate frequency of each of 3 request types
--call functions for each request type with frequency
+-generate number of research requests for this user's visit
+-call sessionResearchActivity
 =========================================================== */
 
 const createSessionBundle = (numberOfSessionBundles) => {
-
   for (var i = 0; i < numberOfSessionBundles; i++) {
     var user_id = newUser();
     var session_id = newSession();
 
-    // How many of each request type will this bundle generate?
     var numberOfResearch = requestTypeFrequency();
     sessionResearchActivity(numberOfResearch, user_id, session_id);
   }
 }
 
+/* ===========================================================
+sessionResearchActivity
+-add "numberOfResearch" rows to sessionInfo table
+-for each new row
+  -retrieve random indicator from generateResearchType
+  -retrieve random interval from generateInterval
+  -insert current user_id and session_id; hard coded indicator & interval values
+-add row to indicate end of user's visit
+=========================================================== */
+
 const sessionResearchActivity = (numberOfResearch, user_id, session_id) => {
   for (var i = 0; i < numberOfResearch; i++) {
+    var majorPair = generateMajorPair();
     var indicator = generateResearchType();
     var interval = generateInterval();
-    addResearchSessionData(user_id, session_id, 'research', 'EURUSD', indicator, interval);
+    addResearchSessionData(user_id, session_id, 'research', majorPair, indicator, interval);
   }
   addResearchSessionData(user_id, session_id, 'END', 'END', 'END', 'END');
 }
@@ -56,17 +65,26 @@ const requestTypeFrequency = () => {
 }
 
 /* ===========================================================
-create 8-digit user_id, 1000000 - 99999999
+create 8-digit user_id
 =========================================================== */
 const newUser = () => {
   return Math.floor((Math.random() * 1000000) + 1000000);
 }
 
 /* ===========================================================
-create 9-digit session_id, 10000000 - 999999999
+create 9-digit session_id
 =========================================================== */
 const newSession = () => {
   return Math.floor((Math.random() * 10000000) + 10000000);
+}
+
+
+/* ===========================================================
+generate Major Pair, no weighting
+=========================================================== */
+const generateMajorPair = () => {
+  var majorPairTypes = ['EURUSD', 'GBPUSD', 'USDCAD', 'USDCHF' ,'USDJPY', 'EURGBP', 'EURCHF', 'AUDUSD', 'EURJPY', 'GBPJPY'];
+  return majorPairTypes[Math.floor(Math.random() * majorPairTypes.length)];
 }
 
 /* ===========================================================
@@ -78,12 +96,12 @@ const generateResearchType = () => {
 }
 
 /* ===========================================================
-generate research interval, weighted for 5s
+generate research interval, heavily weighted for 5s
 =========================================================== */
 const generateInterval = () => {
   // console.log(numberOfResearch);
   var intervalTypes = ['5s', '1', '30', '1h', '1d', '1m'];
-  return chance.weighted(intervalTypes, [50, 20, 10, 20, 20, 5]);
+  return chance.weighted(intervalTypes, [100, 20, 10, 20, 20, 5]);
 }
 
 /* ===========================================================
@@ -114,3 +132,9 @@ module.exports = {
 };
 
 createSessionBundle(numberOfSessionBundles);
+
+
+
+
+
+
