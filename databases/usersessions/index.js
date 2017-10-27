@@ -12,12 +12,12 @@ if (process.env.DATABASE_URL) {
   config.user = 'macd';
   config.password = 'macd';
   config.database = 'usersessions';
-}
+} 
 
 var pool = new pg.Pool(config)
 pool.connect();
 
-const numberOfSessionBundles = 10;
+const numberOfSessionBundles = 5000;
 
 /* ===========================================================
 createSessionBundle
@@ -28,6 +28,8 @@ createSessionBundle
 =========================================================== */
 
 const createSessionBundle = (numberOfSessionBundles) => {
+  var startTime = new Date();
+
   for (var i = 0; i < numberOfSessionBundles; i++) {
     var user_id = newUser();
     var session_id = newSession();
@@ -35,12 +37,15 @@ const createSessionBundle = (numberOfSessionBundles) => {
     var numberOfResearch = requestTypeFrequency();
     sessionResearchActivity(numberOfResearch, user_id, session_id);
   }
+
+  console.log('RUN TIME', (new Date() - startTime) / 1000);
 }
 
 /* ===========================================================
 sessionResearchActivity
 -add "numberOfResearch" rows to sessionInfo table
 -for each new row
+  -retrieve random major pair from generateMajorPair
   -retrieve random indicator from generateResearchType
   -retrieve random interval from generateInterval
   -insert current user_id and session_id; hard coded indicator & interval values
@@ -78,13 +83,13 @@ const newSession = () => {
   return Math.floor((Math.random() * 10000000) + 10000000);
 }
 
-
 /* ===========================================================
 generate Major Pair, no weighting
 =========================================================== */
 const generateMajorPair = () => {
   var majorPairTypes = ['EURUSD', 'GBPUSD', 'USDCAD', 'USDCHF' ,'USDJPY', 'EURGBP', 'EURCHF', 'AUDUSD', 'EURJPY', 'GBPJPY'];
   return majorPairTypes[Math.floor(Math.random() * majorPairTypes.length)];
+  return chance.pickone(majorPairTypes);
 }
 
 /* ===========================================================
@@ -99,7 +104,6 @@ const generateResearchType = () => {
 generate research interval, heavily weighted for 5s
 =========================================================== */
 const generateInterval = () => {
-  // console.log(numberOfResearch);
   var intervalTypes = ['5s', '1', '30', '1h', '1d', '1m'];
   return chance.weighted(intervalTypes, [100, 20, 10, 20, 20, 5]);
 }
@@ -132,9 +136,3 @@ module.exports = {
 };
 
 createSessionBundle(numberOfSessionBundles);
-
-
-
-
-
-
