@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Configuration
-config.js
+config.js*
 
 
 # Runtime data
