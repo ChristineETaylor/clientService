@@ -55,8 +55,6 @@ app.get('/list', function (req, res) {
 });
 
 // Sending a message.
-// NOTE: Here we need to populate the queue url you want to send to.
-// That variable is indicated at the top of app.js.
 app.get('/send', function (req, res) {
     var params = {
         MessageBody: 'Sending sessioninfo message to queue!',
