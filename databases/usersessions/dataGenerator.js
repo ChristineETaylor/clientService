@@ -16,9 +16,7 @@ Connect to PostgreSQL with Pool, using settings in config.js
 
 const pool = new pg.Pool(config);
 
-pool.on('error', (err) => {
-  console.error(err);
-});
+pool.on('error', (err) => console.error(err));
 pool.connect();
 
 
@@ -30,7 +28,7 @@ Defines the number of user visits to simulate
 =========================================================== */
 
 
-const numberOfSessionBundles = 10000;
+const numberOfSessionBundles = 10;
 
 
 /* ===========================================================
@@ -45,12 +43,9 @@ const createSessionBundle = (numberOfSessionBundles) => {
   let startTime = new Date();
 
   for (let i = 0; i < numberOfSessionBundles; i++) {
-    
     let user_id = newUser(); // generates new ids and visits
     // let user_id = existingUser(); // create new visits for existing users
-    
     let session_id = newSession(); 
-
     let numberOfResearch = requestTypeFrequency();
     sessionResearchActivity(numberOfResearch, user_id, session_id);
   }
@@ -80,28 +75,23 @@ const sessionResearchActivity = (numberOfResearch, user_id, session_id) => {
 /* ===========================================================
 generate random num (0-100) for number of requests in user's visit
 =========================================================== */
-const requestTypeFrequency = () => {
-  return Math.floor((Math.random() * 100) + 1);
-}
+const requestTypeFrequency = () => Math.floor((Math.random() * 100) + 1);
+
 
 /* ===========================================================
 create 8-digit user_id
 =========================================================== */
-const newUser = () => {
-  return Math.floor((Math.random() * 1000000) + 1000000);
-}
+const newUser = () =>  Math.floor((Math.random() * 1000000) + 1000000);
 
-const existingUser = () => {
-  return chance.pickone(topTraders.leadingTraders); // from pool of 100 traders
-  // return chance.pickone(topTraders.topTenTraders); // from pool of 10 most profitable
-}
+const existingUser = () => chance.pickone(topTraders.leadingTraders); // from pool of 100 traders
+  // chance.pickone(topTraders.topTenTraders); // from pool of 10 most profitable
+
 
 /* ===========================================================
 create 9-digit session_id
 =========================================================== */
-const newSession = () => {
-  return Math.floor((Math.random() * 10000000) + 10000000);
-}
+const newSession = () => Math.floor((Math.random() * 10000000) + 10000000);
+
 
 /* ===========================================================
 generate Major Pair, no weighting
@@ -152,7 +142,8 @@ module.exports = {
   pool: pool,
   generateInterval: generateInterval,
   generateResearchType: generateResearchType,
-  addResearchSessionData: addResearchSessionData
+  addResearchSessionData: addResearchSessionData,
+  createSessionBundle: createSessionBundle
 };
 
-createSessionBundle(numberOfSessionBundles);
+// createSessionBundle(numberOfSessionBundles);
