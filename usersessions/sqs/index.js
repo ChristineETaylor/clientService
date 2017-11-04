@@ -1,25 +1,25 @@
 // Require objects.
-var express  = require('express');
-var app      = express();
-var AWS      = require('aws-sdk');
+var express = require('express');
+var app = express();
+var AWS = require('aws-sdk');
 var queueUrl = "http://sqs.us-west-1.amazonaws.com/481569304347/sessioninfo";
-var receipt  = "";
-    
+var receipt = "";
+
 // Load your AWS credentials and try to instantiate the object.
 AWS.config.loadFromPath(__dirname + '/config.json');
 
-var myCredentials = new AWS.CognitoIdentityCredentials({IdentityPoolId:'IDENTITY_POOL_ID'});
+var myCredentials = new AWS.CognitoIdentityCredentials({ IdentityPoolId: 'IDENTITY_POOL_ID' });
 var myConfig = new AWS.Config({
-  credentials: myCredentials, region: 'us-west-1b'
+    credentials: myCredentials, region: 'us-west-1b'
 });
 
 // Instantiate SQS.
 var sqs = new AWS.SQS();
 
-AWS.events.on('httpError', function() {
-  if (this.response.error && this.response.error.code === 'UnknownEndpoint') {
-    this.response.error.retryable = true;
-  }
+AWS.events.on('httpError', function () {
+    if (this.response.error && this.response.error.code === 'UnknownEndpoint') {
+        this.response.error.retryable = true;
+    }
 });
 
 
@@ -28,29 +28,29 @@ app.get('/create', function (req, res) {
     var params = {
         QueueName: "sessioninfo"
     };
-    
-    sqs.createQueue(params, function(err, data) {
+
+    sqs.createQueue(params, function (err, data) {
         console.log('region:', this.request.httpRequest.region);
         console.log("ENDPOINT", this.request.httpRequest.endpoint);
-        
-        if(err) {
+
+        if (err) {
             res.send(err);
-        } 
+        }
         else {
             res.send(data);
-        } 
+        }
     });
 });
 
 // Listing our queues.
 app.get('/list', function (req, res) {
-    sqs.listQueues(function(err, data) {
-        if(err) {
+    sqs.listQueues(function (err, data) {
+        if (err) {
             res.send(err);
-        } 
+        }
         else {
             res.send(data);
-        } 
+        }
     });
 });
 
@@ -62,13 +62,13 @@ app.get('/send', function (req, res) {
         DelaySeconds: 0
     };
 
-    sqs.sendMessage(params, function(err, data) {
-        if(err) {
+    sqs.sendMessage(params, function (err, data) {
+        if (err) {
             res.send(err);
-        } 
+        }
         else {
             res.send(data);
-        } 
+        }
     });
 });
 
@@ -83,14 +83,14 @@ app.get('/receive', function (req, res) {
         QueueUrl: queueUrl,
         VisibilityTimeout: 600 // 10 min wait time for anyone else to process.
     };
-    
-    sqs.receiveMessage(params, function(err, data) {
-        if(err) {
+
+    sqs.receiveMessage(params, function (err, data) {
+        if (err) {
             res.send(err);
-        } 
+        }
         else {
             res.send(data);
-        } 
+        }
     });
 });
 
@@ -100,14 +100,14 @@ app.get('/delete', function (req, res) {
         QueueUrl: queueUrl,
         ReceiptHandle: receipt
     };
-    
-    sqs.deleteMessage(params, function(err, data) {
-        if(err) {
+
+    sqs.deleteMessage(params, function (err, data) {
+        if (err) {
             res.send(err);
-        } 
+        }
         else {
             res.send(data);
-        } 
+        }
     });
 });
 
@@ -116,14 +116,14 @@ app.get('/purge', function (req, res) {
     var params = {
         QueueUrl: queueUrl
     };
-    
-    sqs.purgeQueue(params, function(err, data) {
-        if(err) {
+
+    sqs.purgeQueue(params, function (err, data) {
+        if (err) {
             res.send(err);
-        } 
+        }
         else {
             res.send(data);
-        } 
+        }
     });
 });
 

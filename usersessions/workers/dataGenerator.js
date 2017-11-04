@@ -8,7 +8,7 @@ const Chance = require('chance');
 const chance = new Chance();
 
 const topTraders = require('./topTraders.js');
-const config = require('./config.js');
+const config = require('../db/config.js');
 
 /* ===========================================================
 Connect to PostgreSQL with Pool, using settings in config.js
@@ -28,7 +28,7 @@ Defines the number of user visits to simulate
 =========================================================== */
 
 
-const numberOfSessionBundles = 10;
+const numberOfSessionBundles = 100;
 
 
 /* ===========================================================
@@ -45,7 +45,7 @@ const createSessionBundle = (numberOfSessionBundles) => {
   for (let i = 0; i < numberOfSessionBundles; i++) {
     let user_id = newUser(); // generates new ids and visits
     // let user_id = existingUser(); // create new visits for existing users
-    let session_id = newSession(); 
+    let session_id = newSession();
     let numberOfResearch = requestTypeFrequency();
     sessionResearchActivity(numberOfResearch, user_id, session_id);
   }
@@ -81,10 +81,10 @@ const requestTypeFrequency = () => Math.floor((Math.random() * 100) + 1);
 /* ===========================================================
 create 8-digit user_id
 =========================================================== */
-const newUser = () =>  Math.floor((Math.random() * 1000000) + 1000000);
+const newUser = () => Math.floor((Math.random() * 1000000) + 1000000);
 
 const existingUser = () => chance.pickone(topTraders.leadingTraders); // from pool of 100 traders
-  // chance.pickone(topTraders.topTenTraders); // from pool of 10 most profitable
+// chance.pickone(topTraders.topTenTraders); // from pool of 10 most profitable
 
 
 /* ===========================================================
@@ -146,4 +146,4 @@ module.exports = {
   createSessionBundle: createSessionBundle
 };
 
-// createSessionBundle(numberOfSessionBundles);
+createSessionBundle(numberOfSessionBundles);
