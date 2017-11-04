@@ -1,5 +1,5 @@
 const elasticsearch = require('elasticsearch');
-const generateFakeData = require('../dataGenerator');
+const dataGenerator = require('../usersessions/dataGenerator');
 
 const elasticClient = new elasticsearch.Client({
   host: 'localhost:9200'
@@ -16,16 +16,18 @@ elasticClient.ping({
 });
 
 
-let usersessions = dataGenerator.createSessionData(100);
+let usersessions = dataGenerator.createSessionBundle(100);
+
+console.log(usersessions);
 
 console.time('insert');
 
-usersessions.bids.forEach(session => {
-  elasticClient.index({
-    type: 'bid',
-    index: 'orders',
-    body: session,
-  });
-});
+// usersessions.createSessionBundle.forEach(session => {
+//   elasticClient.index({
+//     type: 'research',
+//     index: 'usersessions',
+//     body: session,
+//   });
+// });
 
 console.timeEnd('insert');
