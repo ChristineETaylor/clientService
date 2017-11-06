@@ -26,51 +26,52 @@ AWS.events.on('httpError', () => {
   }
 });
 
-for (var n = 0; n < 2000; n++) {
+let generateBundles = (numberOfBundles) => {
+  for (var n = 0; n < numberOfBundles; n++) {
 
-  /* ===========================================================
-  Attributes contains user ID and session ID
-  =========================================================== */
-  let attributes = {
-    session_id: dataGenFunctions.newSession(),
-    user_id: dataGenFunctions.existingUser()
-    // user_id: dataGenFunctions.newUser()
-  }
-
-
-  /* ===========================================================
-  Payload contains all research activity for one user's session
-  =========================================================== */
-  let payload = {
-    payload: dataGenFunctions.sessionResearchActivity()
-  }
-
-
-  /* ===========================================================
-  Message parameters contains JSON information to send to queue
-  =========================================================== */
-  let params = {
-    QueueUrl: queueUrl,
-    MessageBody: JSON.stringify(payload),
-    MessageAttributes: {
-      user_id: { DataType: 'Number', StringValue: JSON.stringify(attributes.user_id) },
-      session_id: { DataType: 'Number', StringValue: JSON.stringify(attributes.session_id) }
-    },
-    DelaySeconds: 0
-  };
-
-
-  /* ===========================================================
-  Send message with complete session info to SQS
-  =========================================================== */
-  sqs.sendMessage(params, (err, data) => {
-    if (err) {
-      console.log("Error", err);
+    /* ===========================================================
+    Attributes contains user ID and session ID
+    =========================================================== */
+    let attributes = {
+      session_id: dataGenFunctions.newSession(),
+      user_id: dataGenFunctions.existingUser()
+      // user_id: dataGenFunctions.newUser()
     }
-    // } else {
-    //   console.log("Success", data.MessageId);
-    // }
-  });
 
 
+    /* ===========================================================
+    Payload contains all research activity for one user's session
+    =========================================================== */
+    let payload = {
+      payload: dataGenFunctions.sessionResearchActivity()
+    }
+
+
+    /* ===========================================================
+    Message parameters contains JSON information to send to queue
+    =========================================================== */
+    let params = {
+      QueueUrl: queueUrl,
+      MessageBody: JSON.stringify(payload),
+      MessageAttributes: {
+        user_id: { DataType: 'Number', StringValue: JSON.stringify(attributes.user_id) },
+        session_id: { DataType: 'Number', StringValue: JSON.stringify(attributes.session_id) }
+      },
+      DelaySeconds: 0
+    };
+
+
+    /* ===========================================================
+    Send message with complete session info to SQS
+    =========================================================== */
+    sqs.sendMessage(params, (err, data) => {
+      if (err) {
+        console.log("Error", err);
+      } else {
+        console.log("Success", data.MessageId);
+      }
+    });
+  }
 }
+
+generateBundles(100000);
