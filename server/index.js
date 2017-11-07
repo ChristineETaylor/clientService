@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const config = require('./config.js');
+// const config = require('./config.js');
 const port = 3000;
 
 
@@ -10,7 +10,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 
 app.get('/', (req, res) => {
-  res.status(200).json('Thesis Powers Activate');
+  res.status(200).json('Thesis Powers Activate!');
 });
 
 app.listen(port, (err) => {
