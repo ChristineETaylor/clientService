@@ -9,12 +9,12 @@ const dataGenFunctions = require('./dataGenFunctions'); // all data generation f
 
 
 /* ===========================================================
-AWS/SQS credentials and SQS instanciation
+AWS/SQS credentials and SQS instantiation
 =========================================================== */
 const AWS = require('aws-sdk');
 const queueUrl = "http://sqs.us-west-1.amazonaws.com/481569304347/sessioninfo";
 
-AWS.config.loadFromPath('../sqs/config.json');
+AWS.config.loadFromPath('../..//sqs/config.json');
 
 const myCredentials = new AWS.CognitoIdentityCredentials({ IdentityPoolId: 'IDENTITY_POOL_ID' });
 const myConfig = new AWS.Config({ credentials: myCredentials, region: 'us-west-1' });
@@ -26,8 +26,12 @@ AWS.events.on('httpError', () => {
   }
 });
 
-let generateBundles = (numberOfBundles) => {
-  for (var n = 0; n < numberOfBundles; n++) {
+/* ===========================================================
+Generate and send 1000 user sessions to sessioninfo queue
+=========================================================== */
+
+let generateBundles = () => {
+  for (var n = 0; n < 1000; n++) {
 
     /* ===========================================================
     Attributes contains user ID and session ID
@@ -74,4 +78,11 @@ let generateBundles = (numberOfBundles) => {
   }
 }
 
-generateBundles(100000);
+var timesRun = 0;
+var interval = setInterval(() => {
+  timesRun++;
+  if (timesRun === 100) {
+    clearInterval(interval);
+  }
+  generateBundles();
+}, 10000); 
