@@ -10,7 +10,7 @@ AWS.config.loadFromPath(__dirname + '/config.json');
 
 var myCredentials = new AWS.CognitoIdentityCredentials({ IdentityPoolId: 'IDENTITY_POOL_ID' });
 var myConfig = new AWS.Config({
-    credentials: myCredentials, region: 'us-west-1b'
+    credentials: myCredentials, region: 'us-west-1'
 });
 
 // Instantiate SQS.
@@ -21,7 +21,6 @@ AWS.events.on('httpError', function () {
         this.response.error.retryable = true;
     }
 });
-
 
 // Creating a queue.
 app.get('/create', function (req, res) {
@@ -46,19 +45,33 @@ app.get('/create', function (req, res) {
 app.get('/list', function (req, res) {
     sqs.listQueues(function (err, data) {
         if (err) {
+            console.log('region:', this.request.httpRequest.region);
+            console.log('endpoint:', this.request.httpRequest.endpoint.hostname);
             res.send(err);
         }
         else {
+            console.log('region:', this.request.httpRequest.region);
+            console.log('endpoint:', this.request.httpRequest.endpoint.hostname);
             res.send(data);
         }
     });
 });
 
+var body = { payload: [{ majorPair: 'EURUSD', interval: '5s', indicator: 'MACD' }, { majorPair: 'USDGBP', interval: '5s', indicator: 'MACD' }, { majorPair: 'USDGBP', interval: '1h', indicator: 'EMA' }] };
+var attributes = {
+    session_id: 123456789,
+    user_id: 12345678
+}
+
 // Sending a message.
 app.get('/send', function (req, res) {
     var params = {
-        MessageBody: 'Sending sessioninfo message to queue!',
         QueueUrl: queueUrl,
+        MessageBody: JSON.stringify(body),
+        MessageAttributes: {
+            user_id: { DataType: 'Number', StringValue: user_id },
+            session_id: { DataType: 'Number', StringValue: session_id }
+        },
         DelaySeconds: 0
     };
 
@@ -132,6 +145,6 @@ var server = app.listen(80, function () {
     var host = server.address().address;
     var port = server.address().port;
 
-    console.log('AWS SQS example app listening at http://%s:%s', host, port);
+    console.log('AWS SQS app listening on port', port);
 });
 

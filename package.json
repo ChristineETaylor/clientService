@@ -1,0 +1,14 @@
+{
+  "name": "aws-sqs-tutorial",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "aws-sdk": "~2.1.36",
+    "express": "~4.12.4",
+    "moment": "^2.19.1",
+    "moment-random": "^1.0.3",
+    "moment-range": "^3.0.3",
+    "nosqlimport": "^0.1.7",
+    "nosqlimport-elasticsearch": "^0.1.1"
+  }
+}

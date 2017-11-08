@@ -1,20 +1,20 @@
 /* ===========================================================
-dataGenSQS.js
-Writes generated session bundles to sessioninfo SQS
+hiDataGenSQS.js
+Writes generated requests for research to historicalindicator SQS
 =========================================================== */
 
 const express = require('express');
 const app = express();
-const dataGenFunctions = require('./dataGenFunctions'); // all data generation functions
+const dataGenFunctions = require('./hiFunctions.js'); // all data generation functions
 
 
 /* ===========================================================
 AWS/SQS credentials and SQS instantiation
 =========================================================== */
 const AWS = require('aws-sdk');
-const queueUrl = "http://sqs.us-west-1.amazonaws.com/481569304347/sessioninfo";
+const queueUrl = "http://sqs.us-west-1.amazonaws.com/481569304347/historicalindicator";
 
-AWS.config.loadFromPath('../..//sqs/config.json');
+AWS.config.loadFromPath('../sqs/config.json');
 
 const myCredentials = new AWS.CognitoIdentityCredentials({ IdentityPoolId: 'IDENTITY_POOL_ID' });
 const myConfig = new AWS.Config({ credentials: myCredentials, region: 'us-west-1' });
@@ -31,23 +31,21 @@ Generate and send 1000 user sessions to sessioninfo queue
 =========================================================== */
 
 let generateBundles = () => {
-  for (var n = 0; n < 1000; n++) {
+  for (var n = 0; n < 10; n++) {
 
     /* ===========================================================
-    Attributes contains user ID and session ID
+    Attributes contains user ID
     =========================================================== */
     let attributes = {
-      session_id: dataGenFunctions.newSession(),
-      user_id: dataGenFunctions.existingUser()
-      // user_id: dataGenFunctions.newUser()
+      user_id: dataGenFunctions.newUser()
     }
 
 
     /* ===========================================================
-    Payload contains all research activity for one user's session
+    Payload contains single historical indicator request
     =========================================================== */
     let payload = {
-      payload: dataGenFunctions.sessionResearchActivity()
+      payload: dataGenFunctions.hiRequest()
     }
 
 
@@ -59,7 +57,6 @@ let generateBundles = () => {
       MessageBody: JSON.stringify(payload),
       MessageAttributes: {
         user_id: { DataType: 'Number', StringValue: JSON.stringify(attributes.user_id) },
-        session_id: { DataType: 'Number', StringValue: JSON.stringify(attributes.session_id) }
       },
       DelaySeconds: 0
     };
@@ -81,8 +78,8 @@ let generateBundles = () => {
 var timesRun = 0;
 var interval = setInterval(() => {
   timesRun++;
-  if (timesRun === 100) {
+  if (timesRun === 2) {
     clearInterval(interval);
   }
   generateBundles();
-}, 10000); 
+}, 2000); 

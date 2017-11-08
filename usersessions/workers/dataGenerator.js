@@ -3,6 +3,7 @@ Dependencies
 =========================================================== */
 const pg = require('pg');
 const Promise = require('bluebird');
+const fs = require('fs');
 
 const Chance = require('chance');
 const chance = new Chance();
@@ -47,7 +48,8 @@ const createSessionBundle = (numberOfSessionBundles) => {
     // let user_id = existingUser(); // create new visits for existing users
     let session_id = newSession();
     let numberOfResearch = requestTypeFrequency();
-    sessionResearchActivity(numberOfResearch, user_id, session_id);
+    let record_id = generateRecordID();
+    sessionResearchActivity(numberOfResearch, record_id, user_id, session_id);
   }
 }
 
@@ -62,14 +64,21 @@ sessionResearchActivity
 -add row to indicate end of user's visit
 =========================================================== */
 
-const sessionResearchActivity = (numberOfResearch, user_id, session_id) => {
+const sessionResearchActivity = (numberOfResearch, record_id, user_id, session_id) => {
   for (let i = 0; i < numberOfResearch; i++) {
     let majorPair = generateMajorPair();
     let indicator = generateResearchType();
     let interval = generateInterval();
-    addResearchSessionData(user_id, session_id, 'research', majorPair, indicator, interval);
+    addResearchSessionData(record_id, user_id, session_id, 'research', majorPair, indicator, interval);
   }
-  addResearchSessionData(user_id, session_id, 'END', 'END', 'END', 'END');
+  addResearchSessionData(record_id, user_id, session_id, 'END', 'END', 'END', 'END');
+}
+
+let startingRecord = 1;
+
+const generateRecordID = () => {
+  startingRecord++;
+  return startingRecord;
 }
 
 /* ===========================================================
@@ -106,8 +115,8 @@ const generateMajorPair = () => {
 generate research type, weighted for MACD
 =========================================================== */
 const generateResearchType = () => {
-  const researchTypes = ['MACD', 'EMA', 'MA'];
-  return chance.weighted(researchTypes, [15, 12, 5]);
+  const researchTypes = ['MACD', 'EMA', 'MA', 'SMA', 'Bollinger', 'Fibonacci'];
+  return chance.weighted(researchTypes, [20, 12, 5, 5, 10, 12]);
 }
 
 /* ===========================================================
@@ -118,25 +127,54 @@ const generateInterval = () => {
   return chance.weighted(intervalTypes, [100, 20, 10, 20, 20, 5]);
 }
 
+// /* ===========================================================
+// addResearchSessionData
+// Output: Promise object resolving to added row info.
+// =========================================================== */
+// const addResearchSessionData = (user_id, session_id, requestType, majorPair, indicator, interval) => {
+
+//   const query = "INSERT INTO sessioninfo (user_id, session_id, requestType, majorPair, indicator, interval) VALUES ($1, $2, $3, $4, $5, $6)";
+//   let values = [user_id, session_id, requestType, majorPair, indicator, interval];
+
+//   return new Promise((resolve, reject) => {
+//     pool.query(query, values, (err, result) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         resolve(result);
+//       }
+//     })
+//   })
+// }
+
+
+
+/* WRITES TO ES-FRIENDLY JSON
 /* ===========================================================
-addResearchSessionData
-Output: Promise object resolving to added row info.
-=========================================================== */
-const addResearchSessionData = (user_id, session_id, requestType, majorPair, indicator, interval) => {
+Generates fake data in ES-friendly JSON format
+=============================================================*/
 
-  const query = "INSERT INTO sessioninfo (user_id, session_id, requestType, majorPair, indicator, interval) VALUES ($1, $2, $3, $4, $5, $6)";
-  let values = [user_id, session_id, requestType, majorPair, indicator, interval];
+const addResearchSessionData = (record_id, user_id, session_id, requestType, majorPair, indicator, interval) => {
+  
+    // let values = [record_id, user_id, session_id, requestType, majorPair, indicator, interval];
+    // console.log(values)
+  
+      var index = '{"_index":"usersessions","_type":"research","_id":' + record_id + '}';
+      var indexParsed = JSON.parse(index);
+      // console.log(indexParsed);
+      // console.log(JSON.stringify(indexParsed));
+      var payload = '{"majorPair":"' + majorPair + '","indicator":"' + indicator + '","interval":"' + interval + '","user":' + user_id + ',"session":' + session_id + '}';
+      var payloadParsed = JSON.parse(payload);
+      // console.log(payloadParsed);
+      // console.log(JSON.stringify(payloadParsed));
+    
+  
+    fs.appendFileSync('../../elasticsearch-5.6.3/sessioninfoES.json', JSON.stringify(indexParsed));
+    // fs.appendFileSync('./elasticsearch-5.6.3/sessioninfoES.json', JSON.stringify(indexParsed));
+    fs.appendFileSync('../../elasticsearch-5.6.3/sessioninfoES.json', JSON.stringify(payloadParsed));
+  }
 
-  return new Promise((resolve, reject) => {
-    pool.query(query, values, (err, result) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    })
-  })
-}
+
 
 module.exports = {
   pool: pool,
