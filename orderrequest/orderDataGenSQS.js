@@ -27,22 +27,20 @@ AWS.events.on('httpError', () => {
 });
 
 /* ===========================================================
-Generate and send 1000 user sessions to sessioninfo queue
+Generate and send 1000 user orders to orderrequests queue
 =========================================================== */
-
 let generateBundles = () => {
-  for (var n = 0; n < 100; n++) {
+  for (var n = 0; n < 1000; n++) {
 
     /* ===========================================================
-    Attributes contains user ID
+    Attributes contains major pair (currently, Order Book is only consuming EURUSD)
     =========================================================== */
     let attributes = {
       majorPair: 'EURUSD'
     }
 
-
     /* ===========================================================
-    Payload contains single historical indicator request
+    Payload contains single order request
     =========================================================== */
     let payload = {
       payload: orderFunctions.orderRequest()
@@ -77,8 +75,8 @@ let generateBundles = () => {
 var timesRun = 0;
 var interval = setInterval(() => {
   timesRun++;
-  if (timesRun === 200) {
+  if (timesRun === 100) {
     clearInterval(interval);
   }
   generateBundles();
-}, 2000); 
+}, 10000);

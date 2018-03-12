@@ -31,15 +31,15 @@ Generate and send 1000 user sessions to sessioninfo queue
 =========================================================== */
 
 let generateBundles = () => {
-  for (var n = 0; n < 1000; n++) {
+  for (var n = 0; n < 400; n++) {
 
     /* ===========================================================
     Attributes contains user ID and session ID
     =========================================================== */
     let attributes = {
       session_id: dataGenFunctions.newSession(),
-      user_id: dataGenFunctions.existingUser()
-      // user_id: dataGenFunctions.newUser()
+      // user_id: dataGenFunctions.existingUser()
+      user_id: dataGenFunctions.newUser()
     }
 
 

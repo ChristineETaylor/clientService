@@ -31,7 +31,7 @@ Generate and send 1000 user sessions to sessioninfo queue
 =========================================================== */
 
 let generateBundles = () => {
-  for (var n = 0; n < 10; n++) {
+  for (var n = 0; n < 1000; n++) {
 
     /* ===========================================================
     Attributes contains user ID
@@ -78,8 +78,8 @@ let generateBundles = () => {
 var timesRun = 0;
 var interval = setInterval(() => {
   timesRun++;
-  if (timesRun === 2) {
+  if (timesRun === 100) {
     clearInterval(interval);
   }
   generateBundles();
-}, 2000); 
+}, 10000); 
